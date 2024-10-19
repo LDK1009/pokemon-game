@@ -16,28 +16,54 @@ const ImageRevealGame = () => {
 
   const [image] = useImage(pokemonData[current]?.src); // 임의의 외부 이미지 URL 사용
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const allPokemonData = [];
-      for (let i = 1; i <= 151; i++) {
-        const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${i}`);
-        const speciesResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon-species/${i}`);
-        const koreanName = speciesResponse.data.names.find((name) => name.language.name === "ko");
-        allPokemonData.push({ ...response.data, korean_name: koreanName.name });
-      }
-
-      const needData = lodash.shuffle(allPokemonData).map((el) => {
+  const fetchData = async () => {
+    try {
+      // 151개 포켓몬의 정보를 병렬로 모두 가져오기
+      const pokemonRequests = Array.from({ length: 151 }, (_, i) =>
+        axios.get(`https://pokeapi.co/api/v2/pokemon/${i + 1}`)
+      );
+      const speciesRequests = Array.from({ length: 151 }, (_, i) =>
+        axios.get(`https://pokeapi.co/api/v2/pokemon-species/${i + 1}`)
+      );
+  
+      // 모든 요청이 완료될 때까지 기다림 (병렬로 처리됨)
+      const pokemonResponses = await Promise.all(pokemonRequests);
+      const speciesResponses = await Promise.all(speciesRequests);
+  
+      // 데이터를 정리하여 필요한 정보를 추출
+      const allPokemonData = pokemonResponses.map((response, index) => {
+        const speciesResponse = speciesResponses[index].data;
+        const koreanName = speciesResponse.names.find((name) => name.language.name === "ko");
+  
         return {
-          src: el.sprites.front_default,
-          name: el.korean_name,
+          src: response.data.sprites.front_default,
+          name: koreanName ? koreanName.name : response.data.name, // 한국 이름이 없을 경우 기본 이름 사용
         };
       });
+  
+      // 데이터 섞기 (shuffle) 및 필요한 형태로 변환
+      const needData = lodash.shuffle(allPokemonData);
+  
+      return needData;
+    } catch (error) {
+      console.error("Error fetching Pokémon data:", error);
+      return [];
+    }
+  };
 
-      setPokemonData(needData);
+  useEffect(() => {
+    const fetchAndSetData = async () => {
+      const data = await fetchData();
+      setPokemonData(data);
     };
 
-    fetchData();
+    fetchAndSetData();
   }, []);
+
+  useEffect(() => {
+    console.log(pokemonData);
+
+  }, [pokemonData]);
 
   // 공통 핸들러: 마우스 클릭 또는 터치 이벤트 처리
   const handlePointerDown = (e) => {
