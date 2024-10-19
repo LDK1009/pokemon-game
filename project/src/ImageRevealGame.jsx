@@ -12,6 +12,7 @@ const ImageRevealGame = () => {
   const [circles, setCircles] = useState([]);
   const [clickCount, setClickCount] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
+  
   const stageRef = useRef(null);
 
   const [image] = useImage(pokemonData[current]?.src); // 임의의 외부 이미지 URL 사용
@@ -113,20 +114,20 @@ const ImageRevealGame = () => {
       <h2>남은 횟수 {10 - clickCount}</h2>
       <h2>맞춘 횟수 {correctCount}</h2>
       <Stage
-        width={window.innerWidth}
-        height={window.innerHeight * 0.5} // 화면 높이의 30%로 설정
+        width={400}
+        height={400} // 화면 높이의 30%로 설정
         onMouseDown={handlePointerDown} // 마우스 클릭 시 처리
         onTouchStart={handlePointerDown} // 터치 시 처리
         ref={stageRef}
       >
         <Layer>
           {/* 원본 이미지 출력 */}
-          <Image image={image} width={window.innerWidth} height={window.innerHeight * 0.5} />
+          <Image image={image} width={400} height={400} />
         </Layer>
 
         <Layer>
           {/* 검은색 덮개 */}
-          <Rect x={0} y={0} width={window.innerWidth} height={window.innerHeight * 0.5} fill="black" />
+          <Rect x={0} y={0} width={400} height={400} fill="black" />
 
           {/* 클릭 시 생성된 원을 통해 검은색 덮개 제거 */}
           {circles.map((circle, index) => (
