@@ -61,7 +61,7 @@ const ImageRevealGame = () => {
   }, []);
 
   useEffect(() => {
-    console.log(pokemonData);
+    // console.log(pokemonData);
 
   }, [pokemonData]);
 
