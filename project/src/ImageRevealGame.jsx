@@ -99,6 +99,14 @@ const ImageRevealGame = () => {
     }
   };
 
+  // 다음 문제 버튼 클릭 시
+  const nextQuiz = () => {
+    setInputValue("");
+    setCircles([]);
+    setClickCount(0);
+    setCurrent((prev) => (prev + 1));
+  }
+
   return (
     <div style={styles.container}>
       <h1 style={{textAlign:"center"}}>베일을 벗겨<br/>포켓몬을 맞춰보세요!</h1>
@@ -143,6 +151,7 @@ const ImageRevealGame = () => {
         />
         <button onClick={checkAnswer} style={styles.button}>제출</button> {/* 제출 버튼 */}
       </div>
+        <button onClick={nextQuiz} style={styles.nextbutton}>모르겠음</button> {/* 제출 버튼 */}
 
       {/* 정답 여부에 따른 메시지 출력 */}
       {isCorrect !== null && (
@@ -187,6 +196,18 @@ const styles = {
     backgroundColor: "#007BFF",
     color: "white",
     cursor: "pointer",
+    transition: "background-color 0.3s",
+  },
+  nextbutton:{
+    padding: "10px 20px",
+    fontSize: "16px",
+    borderRadius: "5px",
+    border: "none",
+    backgroundColor: "gray",
+    color: "white",
+    cursor: "pointer",
+    width:"320px",
+    marginTop:"20px",
     transition: "background-color 0.3s",
   },
   buttonHover: {
