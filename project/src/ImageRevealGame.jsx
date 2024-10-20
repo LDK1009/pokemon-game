@@ -19,7 +19,7 @@ const ImageRevealGame = () => {
   const [current, setCurrent] = useState(0); // 현재 인덱스
   const [circles, setCircles] = useState([]);
   const [clickCount, setClickCount] = useState(0);
-  const [correctCount, setCorrectCount] = useState(1);
+  const [correctCount, setCorrectCount] = useState(0);
   const [isHide, setIsHide] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false); // 음악 재생 상태
   const [open, setOpen] = React.useState(false); // 모달창
