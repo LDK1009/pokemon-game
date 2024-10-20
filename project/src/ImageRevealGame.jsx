@@ -5,6 +5,10 @@ import axios from "axios";
 import lodash from "lodash";
 import musicPlayImg from "./음악재생중.png";
 import musicStopImg from "./음악중지.png";
+import { Box, Button, Modal } from "@mui/material";
+import styled from "styled-components";
+import { db } from "./firebaseConfig";
+import { addDoc, collection } from "firebase/firestore";
 
 const ImageRevealGame = () => {
   const [pokemonData, setPokemonData] = useState([]);
@@ -16,6 +20,8 @@ const ImageRevealGame = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [isHide, setIsHide] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false); // 음악 재생 상태
+  const [open, setOpen] = React.useState(false); // 모달창
+  const [modalInputValue, setModalInputValue] = useState(""); // input 값을 관리하는 상태
 
   const stageRef = useRef(null);
   const audioRef = useRef(null); // 오디오 요소 참조
@@ -102,6 +108,11 @@ const ImageRevealGame = () => {
     setInputValue(e.target.value); // input에 입력된 값을 상태로 저장
   };
 
+  // 모달창 input 값 변경 시 호출되는 함수
+  const handleModalInputChange = (e) => {
+    setModalInputValue(e.target.value); // input에 입력된 값을 상태로 저장
+  };
+
   // 제출 버튼 클릭 시 정답 검사하는 함수
   const checkAnswer = () => {
     if (inputValue.trim() === pokemonData[current]?.name) {
@@ -116,7 +127,7 @@ const ImageRevealGame = () => {
       if (navigator.vibrate) {
         // 500ms 동안 진동
         navigator.vibrate(500);
-      } 
+      }
     }
   };
 
@@ -133,6 +144,24 @@ const ImageRevealGame = () => {
     }, 1500);
   };
 
+  // 모달 열기/닫기
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  // 데이터 전송하기
+  // Firestore에 새로운 문서 추가
+const upload = async (name, count) => {
+  try {
+    await addDoc(collection(db, "users"), {
+      name,
+      count
+    });
+    alert("🎉등록완료!")
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+};
+  
   return (
     <div style={styles.container}>
       {/* 오디오 태그 */}
@@ -188,31 +217,45 @@ const ImageRevealGame = () => {
           ))}
         </Layer>
       </Stage>
-      <div style={{height:"150px"}}>
-              <div style={styles.inputContainer}>
-        <input
-          placeholder="정답은?"
-          value={inputValue} // input 값 바인딩
-          onChange={handleInputChange} // 값 변경 시 상태 업데이트
-          style={styles.input}
-        />
-        {isHide && (
-          <button onClick={checkAnswer} style={styles.button}>
-            제출
-          </button>
+      <FormContainer>
+        {/* 정답 여부에 따른 메시지 출력 */}
+        {isCorrect !== null && (
+          <div style={styles.result}>{isCorrect ? <p>정답입니다!</p> : <p>오답입니다. 다시 시도하세요.</p>}</div>
         )}
-      </div>
-      {isHide && (
-        <button onClick={nextQuiz} style={styles.nextbutton}>
-          모르겠음
-        </button>
-      )}
-      </div>
+        <div style={styles.inputContainer}>
+          <Input
+            placeholder="정답은?"
+            value={inputValue} // input 값 바인딩
+            onChange={handleInputChange} // 값 변경 시 상태 업데이트
+          />
+          {/* 제출 버튼 */}
+          {isHide && (
+            <SubmitButton onClick={checkAnswer} style={styles.SubmitButton}>
+              제출
+            </SubmitButton>
+          )}
+        </div>
+        {/* 모달 버튼 */}
+        <UploadModalButton onClick={handleOpen}>등록하기</UploadModalButton>
+        {/* 넘기기 버튼 */}
+        {isHide && <NextButton onClick={nextQuiz}>모르겠음</NextButton>}
 
-      {/* 정답 여부에 따른 메시지 출력 */}
-      {isCorrect !== null && (
-        <div style={styles.result}>{isCorrect ? <p>정답입니다!</p> : <p>오답입니다. 다시 시도하세요.</p>}</div>
-      )}
+        <Modal open={open} onClose={handleClose}>
+          <UploadContainer>
+            <h2>
+              {modalInputValue ? `${modalInputValue}의` : "내"} 기록 : {correctCount}
+            </h2>
+            <UploadModalFormWrap>
+              <Input
+                placeholder="등록할 닉네임을 입력해주세요"
+                value={modalInputValue} // input 값 바인딩
+                onChange={handleModalInputChange} // 값 변경 시 상태 업데이트
+              />
+              <UploadButton onClick={()=>upload(modalInputValue, correctCount)}>등록</UploadButton>
+            </UploadModalFormWrap>
+          </UploadContainer>
+        </Modal>
+      </FormContainer>
     </div>
   );
 };
@@ -231,43 +274,6 @@ const styles = {
     justifyContent: "center",
     marginTop: "20px",
   },
-  input: {
-    padding: "10px 20px",
-    fontSize: "16px",
-    borderRadius: "5px",
-    border: "2px solid #ccc",
-    marginRight: "10px",
-    outline: "none",
-    transition: "border-color 0.3s",
-    width: "200px",
-    textAlign: "center",
-  },
-  button: {
-    width: "100px",
-    padding: "10px 20px",
-    fontSize: "16px",
-    borderRadius: "5px",
-    border: "none",
-    backgroundColor: "#007BFF",
-    color: "white",
-    cursor: "pointer",
-    transition: "background-color 0.3s",
-  },
-  nextbutton: {
-    padding: "10px 20px",
-    fontSize: "16px",
-    borderRadius: "5px",
-    border: "none",
-    backgroundColor: "gray",
-    color: "white",
-    cursor: "pointer",
-    width: "350px",
-    marginTop: "20px",
-    transition: "background-color 0.3s",
-  },
-  buttonHover: {
-    backgroundColor: "#0056b3",
-  },
   result: {
     marginTop: "20px",
     fontSize: "18px",
@@ -278,5 +284,70 @@ const styles = {
     height: "30px",
   },
 };
+
+const Input = styled.input`
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 2px solid #ccc;
+  margin-right: 10px;
+  outline: none;
+  transition: border-color 0.3s;
+  width: 200px;
+  text-align: center;
+`;
+
+const FormContainer = styled.div`
+  text-align: center;
+`;
+
+const SubmitButton = styled.button`
+  display: block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  width: 100px;
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+const UploadModalButton = styled(SubmitButton)`
+  width: 350px;
+  background-color: burlywood;
+  margin-top: 10px;
+`;
+
+const NextButton = styled(UploadModalButton)`
+  background-color: gray;
+`;
+
+const UploadButton = styled(UploadModalButton)`
+  width: 100px;
+  margin-top: 0px;
+`;
+
+const UploadContainer = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 30px;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const UploadModalFormWrap = styled.div`
+  display: flex;
+`;
 
 export default ImageRevealGame;
