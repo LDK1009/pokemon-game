@@ -3,6 +3,8 @@ import { Stage, Layer, Image, Rect, Circle } from "react-konva";
 import useImage from "use-image";
 import axios from "axios";
 import lodash from "lodash";
+import musicPlayImg from "./음악재생중.png";
+import musicStopImg from "./음악중지.png";
 
 const ImageRevealGame = () => {
   const [pokemonData, setPokemonData] = useState([]);
@@ -13,11 +15,14 @@ const ImageRevealGame = () => {
   const [clickCount, setClickCount] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [isHide, setIsHide] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false); // 음악 재생 상태
 
   const stageRef = useRef(null);
+  const audioRef = useRef(null); // 오디오 요소 참조
 
   const [image] = useImage(pokemonData[current]?.src); // 임의의 외부 이미지 URL 사용
 
+  // 데이터 불러오기
   const fetchData = async () => {
     try {
       // 151개 포켓몬의 정보를 병렬로 모두 가져오기
@@ -27,30 +32,41 @@ const ImageRevealGame = () => {
       const speciesRequests = Array.from({ length: 151 }, (_, i) =>
         axios.get(`https://pokeapi.co/api/v2/pokemon-species/${i + 1}`)
       );
-  
+
       // 모든 요청이 완료될 때까지 기다림 (병렬로 처리됨)
       const pokemonResponses = await Promise.all(pokemonRequests);
       const speciesResponses = await Promise.all(speciesRequests);
-  
+
       // 데이터를 정리하여 필요한 정보를 추출
       const allPokemonData = pokemonResponses.map((response, index) => {
         const speciesResponse = speciesResponses[index].data;
         const koreanName = speciesResponse.names.find((name) => name.language.name === "ko");
-  
+
         return {
           src: response.data.sprites.front_default,
           name: koreanName ? koreanName.name : response.data.name, // 한국 이름이 없을 경우 기본 이름 사용
         };
       });
-  
+
       // 데이터 섞기 (shuffle) 및 필요한 형태로 변환
       const needData = lodash.shuffle(allPokemonData);
-  
+
       return needData;
     } catch (error) {
       console.error("Error fetching Pokémon data:", error);
       return [];
     }
+  };
+
+  // 음악 재생/정지 토글
+  const toggleMusic = () => {
+    if (isPlaying) {
+      audioRef.current.pause(); // 음악 일시 정지
+    } else {
+      audioRef.current.volume = 0.5; // 볼륨 설정 (0.0 ~ 1.0)
+      audioRef.current.play(); // 음악 재생
+    }
+    setIsPlaying(!isPlaying); // 재생 상태 업데이트
   };
 
   useEffect(() => {
@@ -64,7 +80,6 @@ const ImageRevealGame = () => {
 
   useEffect(() => {
     // console.log(pokemonData);
-
   }, [pokemonData]);
 
   // 공통 핸들러: 마우스 클릭 또는 터치 이벤트 처리
@@ -95,7 +110,7 @@ const ImageRevealGame = () => {
       setCircles([]);
       setClickCount(0);
       setCorrectCount((prev) => prev + 1);
-      setCurrent((prev) => (prev + 1));
+      setCurrent((prev) => prev + 1);
     } else {
       setIsCorrect(false); // 오답인 경우
     }
@@ -110,19 +125,35 @@ const ImageRevealGame = () => {
       setInputValue("");
       setCircles([]);
       setClickCount(0);
-      setCurrent((prev) => (prev + 1));
+      setCurrent((prev) => prev + 1);
     }, 2500);
-  }
+  };
 
   return (
     <div style={styles.container}>
-      <h1 style={{textAlign:"center"}}>베일을 벗겨<br/>포켓몬을 맞춰보세요!</h1>
-      <div style={{width:"350px", display:"flex", justifyContent:"space-between"}}>
-      <h1>🔍 {10 - clickCount}</h1>
-      <div>
-      <h2 style={{color:"gray"}}>남은 문제 {pokemonData.length - current + 1}</h2>
-      <h2 style={{color:"blue"}}>맞춘 문제 {correctCount}</h2>
-      </div>
+      {/* 오디오 태그 */}
+      <audio ref={audioRef} src="/audio.mp3" loop />
+      <h1 style={{ textAlign: "center" }}>
+        베일을 벗겨
+        <br />
+        포켓몬을 맞춰보세요!
+      </h1>
+      <div style={{ width: "350px", display: "flex", justifyContent: "space-between" }}>
+        <div>
+          <h2>
+            <img
+              onClick={toggleMusic}
+              src={isPlaying ? musicPlayImg : musicStopImg}
+              alt="음악"
+              style={styles.musicImg}
+            />
+          </h2>
+          <h2>🔍 {10 - clickCount}</h2>
+        </div>
+        <div>
+          <h2 style={{ color: "gray" }}>남은 문제 {pokemonData.length - current + 1}</h2>
+          <h2 style={{ color: "blue" }}>맞춘 문제 {correctCount}</h2>
+        </div>
       </div>
       <Stage
         width={350}
@@ -161,15 +192,21 @@ const ImageRevealGame = () => {
           onChange={handleInputChange} // 값 변경 시 상태 업데이트
           style={styles.input}
         />
-        {isHide && <button onClick={checkAnswer} style={styles.button}>제출</button>}
+        {isHide && (
+          <button onClick={checkAnswer} style={styles.button}>
+            제출
+          </button>
+        )}
       </div>
-        {isHide && <button onClick={nextQuiz} style={styles.nextbutton}>모르겠음</button>}
+      {isHide && (
+        <button onClick={nextQuiz} style={styles.nextbutton}>
+          모르겠음
+        </button>
+      )}
 
       {/* 정답 여부에 따른 메시지 출력 */}
       {isCorrect !== null && (
-        <div style={styles.result}>
-          {isCorrect ? <p>정답입니다!</p> : <p>오답입니다. 다시 시도하세요.</p>}
-        </div>
+        <div style={styles.result}>{isCorrect ? <p>정답입니다!</p> : <p>오답입니다. 다시 시도하세요.</p>}</div>
       )}
     </div>
   );
@@ -201,7 +238,7 @@ const styles = {
     textAlign: "center",
   },
   button: {
-    width:"100px",
+    width: "100px",
     padding: "10px 20px",
     fontSize: "16px",
     borderRadius: "5px",
@@ -211,7 +248,7 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s",
   },
-  nextbutton:{
+  nextbutton: {
     padding: "10px 20px",
     fontSize: "16px",
     borderRadius: "5px",
@@ -219,8 +256,8 @@ const styles = {
     backgroundColor: "gray",
     color: "white",
     cursor: "pointer",
-    width:"350px",
-    marginTop:"20px",
+    width: "350px",
+    marginTop: "20px",
     transition: "background-color 0.3s",
   },
   buttonHover: {
@@ -230,6 +267,10 @@ const styles = {
     marginTop: "20px",
     fontSize: "18px",
     fontWeight: "bold",
+  },
+  musicImg: {
+    width: "30px",
+    height: "30px",
   },
 };
 
