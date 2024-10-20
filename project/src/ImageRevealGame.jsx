@@ -113,6 +113,10 @@ const ImageRevealGame = () => {
       setCurrent((prev) => prev + 1);
     } else {
       setIsCorrect(false); // 오답인 경우
+      if (navigator.vibrate) {
+        // 500ms 동안 진동
+        navigator.vibrate(500);
+      } 
     }
   };
 
