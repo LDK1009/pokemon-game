@@ -126,7 +126,7 @@ const ImageRevealGame = () => {
       setCircles([]);
       setClickCount(0);
       setCurrent((prev) => prev + 1);
-    }, 2500);
+    }, 1500);
   };
 
   return (
@@ -184,8 +184,8 @@ const ImageRevealGame = () => {
           ))}
         </Layer>
       </Stage>
-
-      <div style={styles.inputContainer}>
+      <div style={{height:"150px"}}>
+              <div style={styles.inputContainer}>
         <input
           placeholder="정답은?"
           value={inputValue} // input 값 바인딩
@@ -203,6 +203,7 @@ const ImageRevealGame = () => {
           모르겠음
         </button>
       )}
+      </div>
 
       {/* 정답 여부에 따른 메시지 출력 */}
       {isCorrect !== null && (
