@@ -59,7 +59,7 @@ const Rank = () => {
 
     return (
       <RankCard borderColor={borderColor}>
-        <div>
+        <div style={{width:"150px", height:"30px", lineHeight:"30px", overflow:"hidden"}}>
           {medal} {el.name}
         </div>
         <div>{el.count}</div>
@@ -110,7 +110,7 @@ const RankCardContainer = styled.div`
 `;
 
 const RankCard = styled.div`
-  width: 200px;
+  width: 300px;
   height: 50px;
   border: 3px solid ${(props) => props.borderColor || "#A9A9A9"};
   border-radius: 15px;
@@ -128,7 +128,7 @@ const GameLink = styled(Link)`
 `;
 
 const GameButton = styled(SubmitButton)`
-  width: 200px;
+  width: 300px;
   height: 50px;
   font-size: 20px;
   color: white; /* 부모 요소의 텍스트 색상을 따름 */
