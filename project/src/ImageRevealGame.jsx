@@ -111,8 +111,13 @@ const ImageRevealGame = () => {
   return (
     <div style={styles.container}>
       <h1 style={{textAlign:"center"}}>베일을 벗겨<br/>포켓몬을 맞춰보세요!</h1>
-      <h2>남은 횟수 {10 - clickCount}</h2>
-      <h2>맞춘 횟수 {correctCount}</h2>
+      <div style={{width:"400px", display:"flex", justifyContent:"space-between"}}>
+      <h1>지우개 {10 - clickCount}</h1>
+      <div>
+      <h2 style={{color:"gray"}}>남은 문제 {pokemonData.length - correctCount}</h2>
+      <h2 style={{color:"blue"}}>맞춘 문제 {correctCount}</h2>
+      </div>
+      </div>
       <Stage
         width={400}
         height={400} // 화면 높이의 30%로 설정
