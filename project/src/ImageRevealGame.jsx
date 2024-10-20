@@ -9,6 +9,8 @@ import { Box, Button, Modal } from "@mui/material";
 import styled from "styled-components";
 import { db } from "./firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
+import { Link } from "react-router-dom";
+import backImg from "./뒤로가기.png";
 
 const ImageRevealGame = () => {
   const [pokemonData, setPokemonData] = useState([]);
@@ -17,7 +19,7 @@ const ImageRevealGame = () => {
   const [current, setCurrent] = useState(0); // 현재 인덱스
   const [circles, setCircles] = useState([]);
   const [clickCount, setClickCount] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [correctCount, setCorrectCount] = useState(1);
   const [isHide, setIsHide] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false); // 음악 재생 상태
   const [open, setOpen] = React.useState(false); // 모달창
@@ -150,20 +152,23 @@ const ImageRevealGame = () => {
 
   // 데이터 전송하기
   // Firestore에 새로운 문서 추가
-const upload = async (name, count) => {
-  try {
-    await addDoc(collection(db, "users"), {
-      name,
-      count
-    });
-    alert("🎉등록완료!")
-  } catch (e) {
-    console.error("Error adding document: ", e);
-  }
-};
-  
+  const upload = async (name, count) => {
+    try {
+      await addDoc(collection(db, "users"), {
+        name,
+        count,
+      });
+      alert("🎉등록완료!");
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  };
+
   return (
     <div style={styles.container}>
+      <BackLink to="/">
+        <BackImg src={backImg} />
+      </BackLink>
       {/* 오디오 태그 */}
       <audio ref={audioRef} src="/audio.mp3" loop />
       <h1 style={{ textAlign: "center" }}>
@@ -251,7 +256,7 @@ const upload = async (name, count) => {
                 value={modalInputValue} // input 값 바인딩
                 onChange={handleModalInputChange} // 값 변경 시 상태 업데이트
               />
-              <UploadButton onClick={()=>upload(modalInputValue, correctCount)}>등록</UploadButton>
+              <UploadButton onClick={() => upload(modalInputValue, correctCount)}>등록</UploadButton>
             </UploadModalFormWrap>
           </UploadContainer>
         </Modal>
@@ -267,6 +272,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     margin: "20px",
+    position: "relative",
   },
   inputContainer: {
     display: "flex",
@@ -285,6 +291,18 @@ const styles = {
   },
 };
 
+const BackImg = styled.img`
+  width: 25px;
+  height: 25px;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+`;
+
+const BackLink = styled(Link)`
+  text-decoration: none; /* 밑줄 제거 */
+`;
+
 const Input = styled.input`
   padding: 10px 20px;
   font-size: 16px;
@@ -301,7 +319,7 @@ const FormContainer = styled.div`
   text-align: center;
 `;
 
-const SubmitButton = styled.button`
+export const SubmitButton = styled.button`
   display: block;
   padding: 10px 20px;
   font-size: 16px;
