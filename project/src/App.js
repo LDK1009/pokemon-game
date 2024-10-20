@@ -1,14 +1,18 @@
+import {BrowserRouter, Route, Router, Routes } from "react-router-dom";
 import ImageRevealGame from "./ImageRevealGame";
+import Rank from "./Rank";
+import Main from "./Main";
 
 function App() {
   return (
-    <div>
-      <ImageRevealGame/>
-      <div style={{textAlign:"center", color:"gray", fontSize:"10px"}}>이동규가 만듬</div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Main />} />
+        <Route path="/game" element={<ImageRevealGame />} />
+        <Route path="/rank" element={<Rank />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
 export default App;
-
-
