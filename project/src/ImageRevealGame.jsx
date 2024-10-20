@@ -76,7 +76,7 @@ const ImageRevealGame = () => {
       // 클릭한 좌표에 새로운 원 추가
       setCircles((prevCircles) => [
         ...prevCircles,
-        { x: pos.x, y: pos.y, radius: 25 }, // 원의 좌표와 반지름 저장
+        { x: pos.x, y: pos.y, radius: 20 }, // 원의 좌표와 반지름 저장
       ]);
       setClickCount((prev) => prev + 1);
     }
@@ -111,34 +111,34 @@ const ImageRevealGame = () => {
       setCircles([]);
       setClickCount(0);
       setCurrent((prev) => (prev + 1));
-    }, 3000);
+    }, 2500);
   }
 
   return (
     <div style={styles.container}>
       <h1 style={{textAlign:"center"}}>베일을 벗겨<br/>포켓몬을 맞춰보세요!</h1>
-      <div style={{width:"400px", display:"flex", justifyContent:"space-between"}}>
-      <h1>지우개 {10 - clickCount}</h1>
+      <div style={{width:"350px", display:"flex", justifyContent:"space-between"}}>
+      <h1>🔍 {10 - clickCount}</h1>
       <div>
-      <h2 style={{color:"gray"}}>남은 문제 {pokemonData.length - correctCount}</h2>
+      <h2 style={{color:"gray"}}>남은 문제 {pokemonData.length - current + 1}</h2>
       <h2 style={{color:"blue"}}>맞춘 문제 {correctCount}</h2>
       </div>
       </div>
       <Stage
-        width={400}
-        height={400} // 화면 높이의 30%로 설정
+        width={350}
+        height={350} // 화면 높이의 30%로 설정
         onMouseDown={handlePointerDown} // 마우스 클릭 시 처리
         onTouchStart={handlePointerDown} // 터치 시 처리
         ref={stageRef}
       >
         <Layer>
           {/* 원본 이미지 출력 */}
-          <Image image={image} width={400} height={400} />
+          <Image image={image} width={350} height={350} />
         </Layer>
 
         <Layer>
           {/* 검은색 덮개 */}
-          {isHide && <Rect x={0} y={0} width={400} height={400} fill="black" />}
+          {isHide && <Rect x={0} y={0} width={350} height={350} fill="black" />}
 
           {/* 클릭 시 생성된 원을 통해 검은색 덮개 제거 */}
           {circles.map((circle, index) => (
@@ -201,6 +201,7 @@ const styles = {
     textAlign: "center",
   },
   button: {
+    width:"100px",
     padding: "10px 20px",
     fontSize: "16px",
     borderRadius: "5px",
@@ -218,7 +219,7 @@ const styles = {
     backgroundColor: "gray",
     color: "white",
     cursor: "pointer",
-    width:"320px",
+    width:"350px",
     marginTop:"20px",
     transition: "background-color 0.3s",
   },
