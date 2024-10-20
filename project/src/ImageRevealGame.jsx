@@ -12,7 +12,8 @@ const ImageRevealGame = () => {
   const [circles, setCircles] = useState([]);
   const [clickCount, setClickCount] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
-  
+  const [isHide, setIsHide] = useState(true);
+
   const stageRef = useRef(null);
 
   const [image] = useImage(pokemonData[current]?.src); // 임의의 외부 이미지 URL 사용
@@ -102,10 +103,15 @@ const ImageRevealGame = () => {
 
   // 다음 문제 버튼 클릭 시
   const nextQuiz = () => {
-    setInputValue("");
-    setCircles([]);
-    setClickCount(0);
-    setCurrent((prev) => (prev + 1));
+    setIsHide(false);
+    setInputValue(pokemonData[current].name);
+    setTimeout(() => {
+      setIsHide(true);
+      setInputValue("");
+      setCircles([]);
+      setClickCount(0);
+      setCurrent((prev) => (prev + 1));
+    }, 3000);
   }
 
   return (
@@ -132,7 +138,7 @@ const ImageRevealGame = () => {
 
         <Layer>
           {/* 검은색 덮개 */}
-          <Rect x={0} y={0} width={400} height={400} fill="black" />
+          {isHide && <Rect x={0} y={0} width={400} height={400} fill="black" />}
 
           {/* 클릭 시 생성된 원을 통해 검은색 덮개 제거 */}
           {circles.map((circle, index) => (
@@ -155,9 +161,9 @@ const ImageRevealGame = () => {
           onChange={handleInputChange} // 값 변경 시 상태 업데이트
           style={styles.input}
         />
-        <button onClick={checkAnswer} style={styles.button}>제출</button> {/* 제출 버튼 */}
+        {isHide && <button onClick={checkAnswer} style={styles.button}>제출</button>}
       </div>
-        <button onClick={nextQuiz} style={styles.nextbutton}>모르겠음</button> {/* 제출 버튼 */}
+        {isHide && <button onClick={nextQuiz} style={styles.nextbutton}>모르겠음</button>}
 
       {/* 정답 여부에 따른 메시지 출력 */}
       {isCorrect !== null && (
